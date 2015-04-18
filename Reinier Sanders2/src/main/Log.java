@@ -14,7 +14,7 @@ public class Log {
 	public Log()
 	{
 		establishConnection();
-		out("test\n");
+		out("Djamari begint met praten:");
 		keepSending();
 	}
 	
@@ -59,7 +59,7 @@ public class Log {
 	
 	public synchronized void keepSending() {
 		while (true) {
-			out("見る");
+			out("bla");
 			try {
 				wait(1000);
 			} catch (InterruptedException e) {
