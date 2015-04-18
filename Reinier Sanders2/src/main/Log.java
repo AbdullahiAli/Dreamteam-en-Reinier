@@ -22,7 +22,7 @@ public class Log {
 		try {
 			serv = new ServerSocket(1337);
 		} catch (IOException e) {
-			
+			System.out.println("Couldn't open socket on port 1337");
 		}
 		while (true)
 			try {
