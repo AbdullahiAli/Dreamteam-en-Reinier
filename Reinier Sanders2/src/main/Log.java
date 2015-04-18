@@ -1,33 +1,34 @@
 package main;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
 
-public class Log {
-	private DataInputStream in;
+public class Log extends Thread {
+	// private DataInputStream in;
 	private DataOutputStream out;
 	private ServerSocket serv;
+	private final int SIZE = 10;
+	private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<String>(SIZE);
 	
 	public Log()
 	{
 		establishConnection();
 		out("Djamari begint met praten:");
-		keepSending();
 	}
 	
 	private synchronized void establishConnection() {
 		try {
-			serv = new ServerSocket(1337);
+			if (serv == null) serv = new ServerSocket(1337);
 		} catch (IOException e) {
 			System.out.println("Couldn't open socket on port 1337");
 		}
 		while (true)
 			try {
 				Socket s = serv.accept();
-				in = new DataInputStream(s.getInputStream());
+				// in = new DataInputStream(s.getInputStream());
 				out = new DataOutputStream(s.getOutputStream());
 				return;
 			} catch (IOException e) {
@@ -43,7 +44,7 @@ public class Log {
 		
 	}
 	
-	public void out(String output) {
+	private void send(String output) {
 		try {
 			out.writeUTF(output + "\n");
 			out.flush();
@@ -54,16 +55,23 @@ public class Log {
 			
 			establishConnection();
 		}
-		
 	}
 	
-	public synchronized void keepSending() {
-		while (true) {
-			out("bla");
+	public void out(String output) {
+		if (q.size() < SIZE) {
 			try {
-				wait(1000);
+				q.put(output);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+			}
+		}
+	}
+	
+	public void run() {
+		while (true) {
+			try {
+				String tmp = q.take();
+				send(tmp);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
