@@ -6,6 +6,20 @@ package main;
  * 
  * @author Ramon Eelman s4247728
  */
-public class Core {
+public class Core extends Thread {
+	public static final Log l = new Log();
+	
+	private final TouchSensor t = new TouchSensor();
+	
+	public Core()
+	{
+		l.start();
+		l.out("Bla bla bla");
+		
+	}
+	
+	public void run() {
+		
+	}
 	
 }
