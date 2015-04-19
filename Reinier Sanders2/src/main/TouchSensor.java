@@ -16,7 +16,7 @@ public class TouchSensor extends Thread {
 	private EV3TouchSensor touch;
 	
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
-	private AtomicBoolean enabled;
+	private AtomicBoolean enabled = new AtomicBoolean();
 	
 	public TouchSensor()
 	{
