@@ -14,16 +14,15 @@ import lejos.hardware.sensor.EV3TouchSensor;
 
 public class TouchSensor extends Thread {
 	private EV3TouchSensor touch;
-	
+
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
 	private AtomicBoolean enabled = new AtomicBoolean();
-	
-	public TouchSensor()
-	{
+
+	public TouchSensor() {
 		enabled.set(true);
 		touch = new EV3TouchSensor(SensorPort.S1);
 	}
-	
+
 	public synchronized boolean isTouched() {
 		Float sum = (float) 0.0;
 		for (Float f : ar) {
@@ -31,7 +30,7 @@ public class TouchSensor extends Thread {
 		}
 		return sum / 3 > 0.9;
 	}
-	
+
 	@Override
 	public void run() {
 		float[] sample;
