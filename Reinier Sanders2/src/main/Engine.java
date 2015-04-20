@@ -13,32 +13,31 @@ public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
 	private final int SIZE = 1;
 	private SynchronousQueue<String> q = new SynchronousQueue<String>();
-
-	public Engine() {
+	
+	public Engine()
+	{
 		this.start();
 		Core.l.out("Engine started");
 	}
-
+	
 	public void turnLeft() {
 		try {
 			q.put("left");
 			Core.l.out("leftobject added");
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void turnRight() {
 		try {
 			q.put("right");
 			Core.l.out("rightobject added");
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
+	
 	private synchronized void doTurnLeft(int wait) {
 		left.setSpeed(360);
 		right.setSpeed(360);
@@ -47,12 +46,11 @@ public class Engine extends Thread {
 		try {
 			wait(wait);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 	}
-
+	
 	private synchronized void doTurnRight(int wait) {
 		left.setSpeed(360);
 		right.setSpeed(360);
@@ -61,19 +59,27 @@ public class Engine extends Thread {
 		try {
 			wait(wait);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 	}
-
-	public void Forward() {
+	
+	public void doForward(int i) {
 		left.setSpeed(360);
 		right.setSpeed(360);
 		right.forward();
 		left.forward();
+		try {
+			wait();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
-
+	
+	public void Forward() {
+		q.add("forward");
+	}
+	
 	public synchronized void run() {
 		String action;
 		while (true) {
@@ -81,30 +87,30 @@ public class Engine extends Thread {
 				action = q.take();
 				Core.l.out("Preforming action: " + action);
 				switch (action) {
-				case "left":
-					doTurnLeft(500);
-					stopEngines();
-					break;
-				case "right":
-					doTurnRight(1000);
-					stopEngines();
-					break;
+					case "left":
+						doTurnLeft(500);
+						stopEngines();
+						break;
+					case "right":
+						doTurnRight(1000);
+						stopEngines();
+						break;
+					case "forward":
+						doForward(0);
+						stopEngines();
+						break;
 				}
 			} catch (InterruptedException e) {
 				Core.l.out("Engine has been interrupted");
 			}
-
+			
 		}
-
+		
 	}
-
-	public void interruptThread() {
-		this.interrupt();
-	}
-
+	
 	private void stopEngines() {
 		left.stop();
 		right.stop();
 	}
-
+	
 }
