@@ -2,6 +2,7 @@ package main;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import main.Engine.EngineAction;
 import Interfaces.ColorEvent;
 import Interfaces.RobotEvent;
 import Interfaces.RobotEventHandler;
@@ -15,12 +16,9 @@ import Interfaces.RobotEventHandler;
 public class Core extends Thread implements RobotEventHandler {
 	public static final Log l = new Log();
 	private final Engine engine = new Engine();
+	public static final WorldKnowledge w = new WorldKnowledge();
 	
-	private enum order {
-		left, right
-	}
-	
-	private order checkFirst = order.right;
+	private EngineAction checkFirst = EngineAction.right;
 	
 	private final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
 	private final ColorSensor t = new ColorSensor(this);
@@ -40,25 +38,36 @@ public class Core extends Thread implements RobotEventHandler {
 	
 	private synchronized void followLine() {
 		RobotEvent r = q.poll();
-		if (r instanceof ColorEvent) {
-			if (((ColorEvent) r).isRed()) {
-				engine.Forward();
+		try {
+			if (r instanceof ColorEvent) {
+				if (((ColorEvent) r).isRed()) {
+					engine.Forward();
+					
+				} else {
+					searchLine();
+				}
 			} else {
-				searchLine();
+				engine.Forward();
 			}
-		} else {
-			engine.Forward();
+		} catch (InterruptedException e) {
+			l.out("Our command was interupted");
 		}
 		
 	}
 	
 	private synchronized void searchLine() {
-		if (checkFirst == order.left) {
-			if (engine.turnLeft()) checkFirst = order.right;
-			else engine.turnRight();
-		} else {
-			if (engine.turnRight()) checkFirst = order.left;
-			else engine.turnLeft();
+		try {
+			if (checkFirst == EngineAction.left) {
+				engine.turnLeft();
+				engine.turnRight();
+			} else {
+				engine.turnRight();
+				engine.turnLeft();
+			}
+		} catch (InterruptedException e) {
+			Core.l.out("We are interupting so we probably found the line");
+			// Optimize to search using the last used EngineAction
+			checkFirst = w.getLastEngine();
 		}
 	}
 	

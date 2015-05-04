@@ -11,24 +11,23 @@ public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
 	private final int SIZE = 1;
 	
+	public enum EngineAction {
+		left, right, forward
+	}
+	
 	// private SynchronousQueue<String> q = new SynchronousQueue<String>();
 	
 	public Engine()
 	{
-		
 		Core.l.out("Engine started");
 	}
 	
-	public boolean turnLeft() {
-		return doCommand("left");
-		// Core.l.out("leftobject added");
-		
+	public void turnLeft() throws InterruptedException {
+		doCommand(EngineAction.right);
 	}
 	
-	public boolean turnRight() {
-		
-		// Core.l.out("rightobject added");
-		return doCommand("right");
+	public void turnRight() throws InterruptedException {
+		doCommand(EngineAction.right);
 	}
 	
 	private synchronized boolean doTurnLeft(int wait) {
@@ -46,34 +45,21 @@ public class Engine extends Thread {
 		
 	}
 	
-	private synchronized boolean doTurnRight(int wait) {
+	private synchronized void doTurnRight(int wait) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);
-		
 		MotorForward(right);
 		MotorBackward(left);
-		try {
-			wait(wait);
-			return true;
-		} catch (InterruptedException e) {
-			Core.l.out("Interupt turn right");
-			return false;
-		}
+		wait(wait);
 		
 	}
 	
-	public boolean doForward(int i) {
+	public void doForward(int i) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);
 		MotorForward(right);
 		MotorForward(left);
-		try {
-			wait(i);
-			return true;
-		} catch (InterruptedException e) {
-			Core.l.out("Interupt forward");
-			return false;
-		}
+		wait(i);
 	}
 	
 	private void MotorForward(NXTRegulatedMotor m) {
@@ -84,28 +70,27 @@ public class Engine extends Thread {
 		m.forward();
 	}
 	
-	public boolean Forward() {
-		return doCommand("forward");
+	public void Forward() throws InterruptedException {
+		doCommand(EngineAction.forward);
 	}
 	
-	public synchronized boolean doCommand(String action) {
-		boolean wasInterupted = false;
+	public synchronized void doCommand(EngineAction action) throws InterruptedException {
 		Core.l.out("Preforming action: " + action);
+		Core.w.setLastEngine(action);
 		switch (action) {
-			case "left":
-				wasInterupted = doTurnLeft(1500);
+			case left:
+				doTurnLeft(1500);
 				stopEngines();
 				break;
-			case "right":
-				wasInterupted = doTurnRight(1500);
+			case right:
+				doTurnRight(1500);
 				stopEngines();
 				break;
-			case "forward":
-				wasInterupted = doForward(0);
+			case forward:
+				doForward(0);
 				stopEngines();
 				break;
 		}
-		return wasInterupted;
 	}
 	
 	private void stopEngines() {
