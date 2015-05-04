@@ -14,9 +14,16 @@ import Interfaces.RobotEventHandler;
  */
 public class Core extends Thread implements RobotEventHandler {
 	public static final Log l = new Log();
-	private Engine engine = new Engine();
-	private final TouchSensor t = new TouchSensor();
-	public ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
+	private final Engine engine = new Engine();
+	
+	private enum order {
+		left, right
+	}
+	
+	private order checkFirst = order.right;
+	
+	private final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
+	private final ColorSensor t = new ColorSensor(this);
 	
 	public Core()
 	{
@@ -27,7 +34,8 @@ public class Core extends Thread implements RobotEventHandler {
 	}
 	
 	public synchronized void run() {
-		followLine();
+		while (true)
+			followLine();
 	}
 	
 	private synchronized void followLine() {
@@ -45,13 +53,19 @@ public class Core extends Thread implements RobotEventHandler {
 	}
 	
 	private synchronized void searchLine() {
-		engine.turnLeft();
-		engine.turnRight();
+		if (checkFirst == order.left) {
+			if (engine.turnLeft()) checkFirst = order.right;
+			else engine.turnRight();
+		} else {
+			if (engine.turnRight()) checkFirst = order.left;
+			else engine.turnLeft();
+		}
 	}
 	
 	@Override
 	public void eventHandle(RobotEvent re) {
 		q.add(re);
+		l.out("INTERRUPT  " + ((ColorEvent) re).isRed());
 		interrupt();
 	}
 	

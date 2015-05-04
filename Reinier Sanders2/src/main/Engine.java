@@ -1,7 +1,5 @@
 package main;
 
-import java.util.concurrent.SynchronousQueue;
-
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
 
@@ -12,105 +10,107 @@ import lejos.hardware.motor.NXTRegulatedMotor;
 public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
 	private final int SIZE = 1;
-	private SynchronousQueue<String> q = new SynchronousQueue<String>();
+	
+	// private SynchronousQueue<String> q = new SynchronousQueue<String>();
 	
 	public Engine()
 	{
-		this.start();
+		
 		Core.l.out("Engine started");
 	}
 	
-	public void turnLeft() {
-		try {
-			q.put("left");
-			Core.l.out("leftobject added");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	public boolean turnLeft() {
+		return doCommand("left");
+		// Core.l.out("leftobject added");
+		
 	}
 	
-	public void turnRight() {
-		try {
-			q.put("right");
-			Core.l.out("rightobject added");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	public boolean turnRight() {
+		
+		// Core.l.out("rightobject added");
+		return doCommand("right");
 	}
 	
-	private synchronized void doTurnLeft(int wait) {
-		left.setSpeed(360);
-		right.setSpeed(360);
-		right.backward();
-		left.forward();
+	private synchronized boolean doTurnLeft(int wait) {
+		left.setSpeed(100);
+		right.setSpeed(100);
+		MotorBackward(right);
+		MotorForward(left);
 		try {
 			wait(wait);
+			return true;
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Core.l.out("Interupt turn left");
+			return false;
 		}
 		
 	}
 	
-	private synchronized void doTurnRight(int wait) {
-		left.setSpeed(360);
-		right.setSpeed(360);
-		right.forward();
-		left.backward();
+	private synchronized boolean doTurnRight(int wait) {
+		left.setSpeed(100);
+		right.setSpeed(100);
+		
+		MotorForward(right);
+		MotorBackward(left);
 		try {
 			wait(wait);
+			return true;
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Core.l.out("Interupt turn right");
+			return false;
 		}
 		
 	}
 	
-	public void doForward(int i) {
-		left.setSpeed(360);
-		right.setSpeed(360);
-		right.forward();
-		left.forward();
+	public boolean doForward(int i) {
+		left.setSpeed(100);
+		right.setSpeed(100);
+		MotorForward(right);
+		MotorForward(left);
 		try {
-			wait();
+			wait(i);
+			return true;
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Core.l.out("Interupt forward");
+			return false;
 		}
 	}
 	
-	public void Forward() {
-		q.add("forward");
+	private void MotorForward(NXTRegulatedMotor m) {
+		m.backward();
 	}
 	
-	public synchronized void run() {
-		String action;
-		while (true) {
-			try {
-				action = q.take();
-				Core.l.out("Preforming action: " + action);
-				switch (action) {
-					case "left":
-						doTurnLeft(500);
-						stopEngines();
-						break;
-					case "right":
-						doTurnRight(1000);
-						stopEngines();
-						break;
-					case "forward":
-						doForward(0);
-						stopEngines();
-						break;
-				}
-			} catch (InterruptedException e) {
-				Core.l.out("Engine has been interrupted");
-			}
-			
+	private void MotorBackward(NXTRegulatedMotor m) {
+		m.forward();
+	}
+	
+	public boolean Forward() {
+		return doCommand("forward");
+	}
+	
+	public synchronized boolean doCommand(String action) {
+		boolean wasInterupted = false;
+		Core.l.out("Preforming action: " + action);
+		switch (action) {
+			case "left":
+				wasInterupted = doTurnLeft(1500);
+				stopEngines();
+				break;
+			case "right":
+				wasInterupted = doTurnRight(1500);
+				stopEngines();
+				break;
+			case "forward":
+				wasInterupted = doForward(0);
+				stopEngines();
+				break;
 		}
-		
+		return wasInterupted;
 	}
 	
 	private void stopEngines() {
-		left.stop();
-		right.stop();
+		left.stop(true);
+		right.stop(true);
 	}
 	
 }
