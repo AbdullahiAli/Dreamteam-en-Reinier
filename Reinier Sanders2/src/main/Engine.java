@@ -30,19 +30,12 @@ public class Engine extends Thread {
 		doCommand(EngineAction.right);
 	}
 	
-	private synchronized boolean doTurnLeft(int wait) {
+	private synchronized void doTurnLeft(int wait) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);
 		MotorBackward(right);
 		MotorForward(left);
-		try {
-			wait(wait);
-			return true;
-		} catch (InterruptedException e) {
-			Core.l.out("Interupt turn left");
-			return false;
-		}
-		
+		wait(wait);
 	}
 	
 	private synchronized void doTurnRight(int wait) throws InterruptedException {
