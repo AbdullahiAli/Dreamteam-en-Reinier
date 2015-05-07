@@ -70,20 +70,15 @@ public class ColorSensor extends Thread {
 		redProvider.fetchSample(redSample, 0);
 		return redSample;
 	}
-	
-	public float[] getRGB() {
-		// returns rgb value
-		rgbProvider = colorSensor.getRGBMode();
-		rgbSample = new float[rgbProvider.sampleSize()];
-		rgbProvider.fetchSample(rgbSample, 0);
-		return rgbSample;
-	}
-	
-	public int getColorID() {
-		// return an enumerated constant that indicates the color
-		// detected. e.g.
-		// Color.BLUE
-		return colorSensor.getColorID();
-	}
+	/*
+	 * public float[] getRGB() { // returns rgb value rgbProvider =
+	 * colorSensor.getRGBMode(); rgbSample = new
+	 * float[rgbProvider.sampleSize()]; rgbProvider.fetchSample(rgbSample,
+	 * 0); return rgbSample; }
+	 * 
+	 * public int getColorID() { // return an enumerated constant that
+	 * indicates the color // detected. e.g. // Color.BLUE return
+	 * colorSensor.getColorID(); }
+	 */
 	
 }

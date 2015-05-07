@@ -9,13 +9,10 @@ import lejos.hardware.motor.NXTRegulatedMotor;
  */
 public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
-	private final int SIZE = 1;
 	
 	public enum EngineAction {
 		left, right, forward
 	}
-	
-	// private SynchronousQueue<String> q = new SynchronousQueue<String>();
 	
 	public Engine()
 	{
@@ -44,7 +41,6 @@ public class Engine extends Thread {
 		MotorForward(right);
 		MotorBackward(left);
 		wait(wait);
-		
 	}
 	
 	public void doForward(int i) throws InterruptedException {
