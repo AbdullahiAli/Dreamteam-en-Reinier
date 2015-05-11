@@ -9,82 +9,82 @@ import lejos.hardware.motor.NXTRegulatedMotor;
  */
 public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
-	
+
 	public enum EngineAction {
 		left, right, forward
 	}
-	
-	public Engine()
-	{
+
+	public Engine() {
 		Core.l.out("Engine started");
 	}
-	
-	public void turnLeft() throws InterruptedException {
-		doCommand(EngineAction.right);
+
+	public void turnLeft(int wait) throws InterruptedException {
+		doCommand(EngineAction.left, wait);
 	}
-	
-	public void turnRight() throws InterruptedException {
-		doCommand(EngineAction.right);
+
+	public void turnRight(int wait) throws InterruptedException {
+		doCommand(EngineAction.right, wait);
 	}
-	
+
 	private synchronized void doTurnLeft(int wait) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);
-		MotorBackward(right);
-		MotorForward(left);
+		MotorBackward(left);
+		MotorForward(right);
 		wait(wait);
 	}
-	
+
 	private synchronized void doTurnRight(int wait) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);
-		MotorForward(right);
-		MotorBackward(left);
+		MotorForward(left);
+		MotorBackward(right);
 		wait(wait);
 	}
-	
+
 	public void doForward(int i) throws InterruptedException {
-		left.setSpeed(100);
-		right.setSpeed(100);
+		left.setSpeed(500);
+		right.setSpeed(500);
 		MotorForward(right);
 		MotorForward(left);
 		wait(i);
 	}
-	
+
 	private void MotorForward(NXTRegulatedMotor m) {
 		m.backward();
 	}
-	
+
 	private void MotorBackward(NXTRegulatedMotor m) {
 		m.forward();
 	}
-	
+
 	public void Forward() throws InterruptedException {
-		doCommand(EngineAction.forward);
+		doCommand(EngineAction.forward, 0);
 	}
-	
-	public synchronized void doCommand(EngineAction action) throws InterruptedException {
-		Core.l.out("Preforming action: " + action);
+
+	public synchronized void doCommand(EngineAction action, int wait)
+			throws InterruptedException {
+		Core.l.out("Performing action: " + action);
 		Core.w.setLastEngine(action);
 		switch (action) {
-			case left:
-				doTurnLeft(1500);
-				stopEngines();
-				break;
-			case right:
-				doTurnRight(1500);
-				stopEngines();
-				break;
-			case forward:
-				doForward(0);
-				stopEngines();
-				break;
+		case left:
+			doTurnLeft(wait);
+			stopEngines();
+			break;
+		case right:
+			doTurnRight(wait);
+			stopEngines();
+			break;
+		case forward:
+			doForward(0);
+			stopEngines();
+			break;
 		}
 	}
-	
+
 	private void stopEngines() {
 		left.stop(true);
 		right.stop(true);
 	}
-	
+
 }

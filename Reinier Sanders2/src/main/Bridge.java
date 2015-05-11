@@ -1,10 +1,10 @@
 package main;
 
-public class Main {
-	
+public class Bridge {
+
 	public static void main(String[] args) {
-		
-		new Core();
+
+		new Core("Bridge");
 	}
-	
+
 }
