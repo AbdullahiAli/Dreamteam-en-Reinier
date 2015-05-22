@@ -16,6 +16,7 @@ public class Log extends Thread {
 	private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<String>(SIZE);
 
 	public Log() {
+		LCD.drawString("Starting log", 0, 0);
 		establishConnection();
 		out("Djamari begint met praten:");
 	}

@@ -3,7 +3,6 @@ package main;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import main.Engine.EngineAction;
-import Interfaces.ColorEvent;
 import Interfaces.RobotEvent;
 import Interfaces.RobotEventHandler;
 
@@ -13,123 +12,27 @@ import Interfaces.RobotEventHandler;
  * 
  * @author Ramon Eelman s4247728
  */
-public class Core extends Thread implements RobotEventHandler {
+public abstract class Core extends Thread {
 	public static final Log l = new Log();
-	private final Engine engine = new Engine();
+	protected final Engine engine = new Engine();
 	public static final WorldKnowledge w = new WorldKnowledge();
-	private String mode;
-	private EngineAction checkFirst = EngineAction.right;
+	protected EngineAction checkFirst = EngineAction.right;
+	protected ColorSensor t;
 
-	private final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
-	private final ColorSensor t = new ColorSensor(this);
+	protected final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
 
-	public Core(String mode) {
-		this.mode = mode;
+	public Core() {
 		l.start();
 		l.out("Bla bla bla");
-		this.start();
 
 	}
 
-	public synchronized void run() {
-		switch (mode) {
-		case "Bridge":
-			while (true) {
-				followLine();
-			}
-		case "Grid":
-			startGrid();
-			while (true) {
-				// followGrid();
-			}
-		}
+	protected void setup(RobotEventHandler c) {
+		t = new ColorSensor(c);
 
 	}
 
-	private synchronized void startGrid() {
-		RobotEvent r = q.poll();
-		boolean done = false;
-		while (!done) {
-			// we komen nooit in de if statement
-			if (r instanceof ColorEvent) {
-				l.out("isRed is: " + ((ColorEvent) r).isRed());
-				if (((ColorEvent) r).isRed()) {
-					done = true;
+	protected abstract void followLine();
 
-				}
-			} else {
-				try {
-					engine.Forward();
-				} catch (InterruptedException e) {
-					l.out("Engine problems");
-					// e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	private synchronized void followGrid() {
-		RobotEvent r = q.poll();
-		try {
-			if (r instanceof ColorEvent) {
-				l.out("isRed is: " + ((ColorEvent) r).isRed());
-				if (((ColorEvent) r).isRed()) {
-					engine.Forward();
-
-				} else {
-					searchLine();
-				}
-			} else {
-				engine.Forward();
-			}
-		} catch (InterruptedException e) {
-			l.out("Our command was interupted");
-		}
-
-	}
-
-	private synchronized void followLine() {
-		RobotEvent r = q.poll();
-		l.out("r: " + r);
-		try {
-			if (r instanceof ColorEvent) {
-				l.out("isRed is: " + ((ColorEvent) r).isRed());
-				if (((ColorEvent) r).isRed()) {
-					engine.Forward();
-
-				} else {
-					searchLine();
-				}
-			} else {
-				engine.Forward();
-			}
-		} catch (InterruptedException e) {
-			l.out("Our command was interupted");
-		}
-
-	}
-
-	private synchronized void searchLine() {
-		try {
-			if (checkFirst == EngineAction.left) {
-				engine.turnLeft(375);
-				engine.turnRight(750);
-			} else {
-				engine.turnRight(375);
-				engine.turnLeft(750);
-			}
-		} catch (InterruptedException e) {
-			Core.l.out("We are interupting so we probably found the line");
-			// Optimize to search using the last used EngineAction
-			checkFirst = w.getLastEngine();
-		}
-	}
-
-	@Override
-	public void eventHandle(RobotEvent re) {
-		q.add(re);
-		l.out("INTERRUPT  " + ((ColorEvent) re).isRed());
-		interrupt();
-	}
-
+	protected abstract void searchLine();
 }
