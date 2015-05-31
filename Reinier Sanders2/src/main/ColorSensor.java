@@ -34,7 +34,7 @@ public class ColorSensor extends Thread {
 			sum += f;
 		}
 
-		return sum / 3 >= 0.10;
+		return sum / 3 >= 0.08;
 	}
 
 	@Override

@@ -1,10 +1,15 @@
 package main;
 
+import lejos.hardware.lcd.LCD;
+import main.Engine.EngineAction;
 import Interfaces.ColorEvent;
 import Interfaces.RobotEvent;
 import Interfaces.RobotEventHandler;
 
 public class GridBehaviour extends Core implements RobotEventHandler {
+	private Integer count = 0;
+	private long timer;
+	private GyroSensor gyro;
 
 	public GridBehaviour() {
 		super();
@@ -13,9 +18,13 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 	}
 
 	public synchronized void run() {
-		startGrid();
-		// while (true)
-		// followLine();
+		// startGrid();
+		gyro = new GyroSensor();
+		while (gyro.getSample() != 360) {
+			LCD.drawString(count.toString(), 1, 1);
+			followLine();
+		}
+		// toCenter();
 
 	}
 
@@ -52,6 +61,7 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 	protected synchronized void followLine() {
 		RobotEvent r = q.poll();
 		l.out("r: " + r);
+		boolean onLine = true;
 		try {
 			if (r instanceof ColorEvent) {
 				l.out("isRed is: " + ((ColorEvent) r).isRed());
@@ -59,10 +69,17 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 					engine.Forward();
 
 				} else {
-					searchLine();
+					onLine = searchLine();
+					if (!onLine) {
+						// LCD.drawString("!onLine", 2, 2);
+						count++;
+						engine.turnRight(1500);
+						l.out("turned Right: 375 , because we're not on a line");
+					}
+					l.out("value of onLine is: " + onLine);
 				}
 			} else {
-				engine.Forward();
+
 			}
 		} catch (InterruptedException e) {
 			l.out("Our command was interupted");
@@ -70,9 +87,23 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 
 	}
 
-	@Override
-	protected synchronized void searchLine() {
+	private synchronized boolean searchLine() {
 
+		try {
+			if (checkFirst == EngineAction.left) {
+				engine.turnLeft(375);
+				engine.turnRight(750);
+			} else {
+				engine.turnRight(375);
+				engine.turnLeft(750);
+			}
+		} catch (InterruptedException e) {
+			Core.l.out("We are interupting so we probably found the line");
+
+			// Optimize to search using the last used EngineAction
+			checkFirst = w.getLastEngine();
+			return true;
+		}
+		return false;
 	}
-
 }

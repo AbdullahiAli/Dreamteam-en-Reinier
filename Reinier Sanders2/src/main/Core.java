@@ -34,5 +34,5 @@ public abstract class Core extends Thread {
 
 	protected abstract void followLine();
 
-	protected abstract void searchLine();
+	// protected abstract void searchLine();
 }

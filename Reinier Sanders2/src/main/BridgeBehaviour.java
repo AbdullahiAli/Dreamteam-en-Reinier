@@ -48,8 +48,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 
 	}
 
-	@Override
-	protected synchronized void searchLine() {
+	private synchronized void searchLine() {
 		try {
 			if (checkFirst == EngineAction.left) {
 				engine.turnLeft(375);
