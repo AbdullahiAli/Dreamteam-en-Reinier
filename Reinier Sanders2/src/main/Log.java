@@ -17,7 +17,6 @@ public class Log extends Thread {
 
 	public Log() {
 		LCD.drawString("Starting log", 0, 0);
-		// establishConnection();
 		out("Djamari begint met praten:");
 	}
 
@@ -72,10 +71,11 @@ public class Log extends Thread {
 	}
 
 	public void run() {
+		establishConnection();
 		while (true) {
 			try {
 				String tmp = q.take();
-				// send(tmp);
+				send(tmp);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

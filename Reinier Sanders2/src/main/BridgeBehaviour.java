@@ -6,6 +6,7 @@ import Interfaces.RobotEvent;
 import Interfaces.RobotEventHandler;
 
 public class BridgeBehaviour extends Core implements RobotEventHandler {
+	private EngineAction checkFirst = EngineAction.right;
 
 	public BridgeBehaviour() {
 		super();

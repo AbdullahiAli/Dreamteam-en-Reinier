@@ -34,6 +34,27 @@ public class Engine extends Thread {
 		wait(wait);
 	}
 
+	public synchronized void turn(int speed, float f)
+			throws InterruptedException {
+		turn(speed, f, 0);
+	}
+
+	public synchronized void turn(int speed, float f, int wait)
+			throws InterruptedException {
+		if (f < 0.5)
+			Core.w.setLastEngine(EngineAction.left);
+		if (f == 0.5)
+			Core.w.setLastEngine(EngineAction.forward);
+		if (f > 0.5)
+			Core.w.setLastEngine(EngineAction.right);
+		left.setSpeed(speed * f);
+		right.setSpeed(speed * (1 - f));
+		MotorForward(left);
+		MotorForward(right);
+		wait(wait);
+
+	}
+
 	private synchronized void doTurnRight(int wait) throws InterruptedException {
 		left.setSpeed(100);
 		right.setSpeed(100);

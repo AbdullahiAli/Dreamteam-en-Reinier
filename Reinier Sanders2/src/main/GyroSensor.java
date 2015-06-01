@@ -9,16 +9,15 @@ import lejos.robotics.SampleProvider;
 import Interfaces.RobotEventHandler;
 
 public class GyroSensor extends Thread {
-	private EV3GyroSensor gyroSensor;
+	private EV3GyroSensor gyroSensor = new EV3GyroSensor(SensorPort.S4);;
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
 	private AtomicBoolean enabled = new AtomicBoolean(true);
-	private RobotEventHandler seh;
+	private RobotEventHandler reh;
 	private SampleProvider angleProvider;
-	private double sample;
+	private float sample;
 
 	public GyroSensor() {
-		this.seh = seh;
-		gyroSensor = new EV3GyroSensor(SensorPort.S4);
+		this.reh = reh;
 		this.start();
 	}
 
@@ -47,7 +46,9 @@ public class GyroSensor extends Thread {
 	public float getAngle() {
 		// returns angle
 		angleProvider = gyroSensor.getAngleMode();
-		float angleSample = angleProvider.sampleSize();
+		float[] sampleArray = new float[angleProvider.sampleSize()];
+		angleProvider.fetchSample(sampleArray, 0);
+		float angleSample = sampleArray[0];
 		return angleSample;
 	}
 
