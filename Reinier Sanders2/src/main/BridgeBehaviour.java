@@ -1,5 +1,6 @@
 package main;
 
+import lejos.hardware.lcd.LCD;
 import main.Engine.EngineAction;
 import Interfaces.ColorEvent;
 import Interfaces.RobotEvent;
@@ -10,7 +11,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 
 	public BridgeBehaviour() {
 		super();
-		setup(this);
+		setup(this, false);
 		this.start();
 	}
 
@@ -21,7 +22,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 	}
 
 	@Override
-	public void eventHandle(RobotEvent re) {
+	public void eventHandle(RobotEvent re, boolean b) {
 		q.add(re);
 		l.out("INTERRUPT  " + ((ColorEvent) re).isRed());
 		interrupt();
@@ -29,6 +30,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 
 	@Override
 	protected synchronized void followLine() {
+		LCD.drawString("followLine", 0, 0);
 		RobotEvent r = q.poll();
 		l.out("r: " + r);
 		try {
@@ -52,11 +54,11 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 	private synchronized void searchLine() {
 		try {
 			if (checkFirst == EngineAction.left) {
-				engine.turnLeft(375);
-				engine.turnRight(750);
+				engine.turnLeft(1500);
+				engine.turnRight(3000);
 			} else {
-				engine.turnRight(375);
-				engine.turnLeft(750);
+				engine.turnRight(1500);
+				engine.turnLeft(3000);
 			}
 		} catch (InterruptedException e) {
 			Core.l.out("We are interupting so we probably found the line");

@@ -19,11 +19,12 @@ public class ColorSensor extends Thread {
 	private float[] rgbSample, redSample;
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
 	private AtomicBoolean enabled = new AtomicBoolean(true);
-	private boolean lastMeasurement = false;
+	private boolean lastMeasurement;
 	private RobotEventHandler seh;
 
-	public ColorSensor(RobotEventHandler seh) {
+	public ColorSensor(RobotEventHandler seh, boolean onLine) {
 		this.seh = seh;
+		this.lastMeasurement = onLine;
 		colorSensor = new EV3ColorSensor(SensorPort.S3);
 		this.start();
 	}
@@ -51,7 +52,7 @@ public class ColorSensor extends Thread {
 				// Core.l.out("" + sample[0]);
 				boolean measure = isRed();
 				if (measure != lastMeasurement) {
-					seh.eventHandle(new ColorEvent(measure));
+					seh.eventHandle(new ColorEvent(measure), false);
 					lastMeasurement = measure;
 				}
 			}

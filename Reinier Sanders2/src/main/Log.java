@@ -16,7 +16,7 @@ public class Log extends Thread {
 	private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<String>(SIZE);
 
 	public Log() {
-		LCD.drawString("Starting log", 0, 0);
+		// LCD.drawString("Starting log", 0, 0);
 		out("Djamari begint met praten:");
 	}
 
@@ -75,7 +75,7 @@ public class Log extends Thread {
 		while (true) {
 			try {
 				String tmp = q.take();
-				send(tmp);
+				// send(tmp);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

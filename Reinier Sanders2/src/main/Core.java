@@ -25,8 +25,8 @@ public abstract class Core extends Thread {
 
 	}
 
-	protected void setup(RobotEventHandler c) {
-		t = new ColorSensor(c);
+	protected void setup(RobotEventHandler c, boolean onLine) {
+		t = new ColorSensor(c, onLine);
 
 	}
 
