@@ -22,7 +22,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 	}
 
 	@Override
-	public void eventHandle(RobotEvent re, boolean b) {
+	public void eventHandle(RobotEvent re) {
 		q.add(re);
 		l.out("INTERRUPT  " + ((ColorEvent) re).isRed());
 		interrupt();

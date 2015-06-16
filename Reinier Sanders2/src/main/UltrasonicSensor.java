@@ -1,7 +1,6 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lejos.hardware.port.SensorPort;
@@ -17,6 +16,7 @@ import Interfaces.UltraSonicEvent;
  */
 
 public class UltrasonicSensor extends Thread {
+	private static final float THRESHHOLD = 0.20f;
 	private EV3UltrasonicSensor ultrasonicSensor;
 	private SampleProvider distanceProvider;
 	private float[] sample;
@@ -39,9 +39,10 @@ public class UltrasonicSensor extends Thread {
 					ar.remove(0);
 				}
 				sample = getDistance();
+
 				ar.add(sample[0]);
-				if (isPillar()) {
-					seh.eventHandle(new UltraSonicEvent(), true);
+				if (isClose(0.40f)) {
+					seh.eventHandle(new UltraSonicEvent());
 				}
 			}
 			try {
@@ -59,10 +60,20 @@ public class UltrasonicSensor extends Thread {
 		return sample;
 	}
 
-	private synchronized boolean isPillar() {
-		ar.sort((Comparator<? super Float>) ar);
+	private boolean isClose(float belowThisValue) {
+		float max = Float.MIN_VALUE;
+		float min = Float.MAX_VALUE;
+		for (float v : ar) {
+			if (min > v) {
+				min = v;
+			}
+			if (max < v) {
+				max = v;
+			}
+		}
+		return Math.abs(min - max) < THRESHHOLD && Math.abs(min - max) > 0
+				&& min < belowThisValue;
 
-		return ar.get(1) < .3;
 	}
 
 }

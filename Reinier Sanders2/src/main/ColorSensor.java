@@ -3,6 +3,7 @@ package main;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
@@ -29,13 +30,15 @@ public class ColorSensor extends Thread {
 		this.start();
 	}
 
-	private synchronized boolean isRed() {
+	public synchronized boolean isRed() {
 		Float sum = (float) 0.0;
 		for (Float f : ar) {
 			sum += f;
 		}
 
-		return sum / 3 >= 0.08;
+		// Testing for Pillar detection
+		LCD.drawString("" + (sum / 3), 0, 2);
+		return (sum / 3) >= 0.08;
 	}
 
 	@Override
@@ -52,7 +55,7 @@ public class ColorSensor extends Thread {
 				// Core.l.out("" + sample[0]);
 				boolean measure = isRed();
 				if (measure != lastMeasurement) {
-					seh.eventHandle(new ColorEvent(measure), false);
+					seh.eventHandle(new ColorEvent(measure));
 					lastMeasurement = measure;
 				}
 			}
@@ -70,15 +73,5 @@ public class ColorSensor extends Thread {
 		redProvider.fetchSample(redSample, 0);
 		return redSample;
 	}
-	/*
-	 * public float[] getRGB() { // returns rgb value rgbProvider =
-	 * colorSensor.getRGBMode(); rgbSample = new
-	 * float[rgbProvider.sampleSize()]; rgbProvider.fetchSample(rgbSample, 0);
-	 * return rgbSample; }
-	 * 
-	 * public int getColorID() { // return an enumerated constant that indicates
-	 * the color // detected. e.g. // Color.BLUE return
-	 * colorSensor.getColorID(); }
-	 */
 
 }

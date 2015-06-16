@@ -1,10 +1,11 @@
 package main;
 
+import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import main.Engine.EngineAction;
-import Interfaces.ColorEvent;
 import Interfaces.RobotEvent;
 import Interfaces.RobotEventHandler;
+import Interfaces.UltraSonicEvent;
 
 public class GridBehaviour extends Core implements RobotEventHandler {
 	private Integer count = 0;
@@ -13,12 +14,14 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 	private EngineAction2 checkFirst = new EngineAction2(EngineAction.left, 0);
 	private int corners = 0;
 	private UltrasonicSensor uss;
+	private boolean gridFound = false;
+	private boolean hardCode = false;
 
 	public GridBehaviour() {
 		super();
 
 		// Moet misschien veranderd worden als startGrid is geïmplementeerd
-		setup(this, true);
+		setup(this, false);
 
 		uss = new UltrasonicSensor(this);
 		this.start();
@@ -26,44 +29,46 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 
 	public synchronized void run() {
 		// startGrid();
-		while (true) {
-			followLine();
-		}
-		// toCenter();
+		/*
+		 * while (corners < 4) { followLine(); }
+		 */
+		toCenter();
 
+	}
+
+	public void toCenter() {
+		turnMove();
+		turnMove();
+		turnMove();
+		hardCode = true;
+		engine.doForward(1000);
+	}
+
+	public void turnCenter() {
+		turnMove();
 	}
 
 	@Override
-	public void eventHandle(RobotEvent re, boolean pillar) {
+	public void eventHandle(RobotEvent re) {
 		q.add(re);
-		if (pillar) {
-			corners++;
-			pillarBehavior();
+
+		if (re instanceof UltraSonicEvent) {
+			LCD.drawString("Pillar found", 2, 2);
+			Sound.twoBeeps();
+		} else if (!hardCode) {
+			interrupt();
 		}
-		// l.out("INTERRUPT  " + ((ColorEvent) re).isRed());
-		interrupt();
 	}
 
 	private synchronized void startGrid() {
-		RobotEvent r = q.poll();
-		boolean done = false;
-		while (!done) {
-			// we komen nooit in de if statement
-			if (r instanceof ColorEvent) {
-				l.out("isRed is: " + ((ColorEvent) r).isRed());
-				if (((ColorEvent) r).isRed()) {
-					done = true;
 
-				}
-			} else {
-				try {
-					engine.Forward();
-				} catch (InterruptedException e) {
-					l.out("Engine problems");
-					// e.printStackTrace();
-				}
-			}
+		try {
+			engine.turn(750, 0.33f);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
 		}
+
 	}
 
 	@Override
@@ -75,25 +80,16 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 		}
 	}
 
-	private void pillarBehavior() {
-
-	}
-
 	private synchronized boolean turnMove() {
 		// long currentTime = System.nanoTime();
 		try {
 			if (Core.w.getLastEngine() == EngineAction.left) {
-				engine.turn(750, 0.66f, 1000);
+				engine.turn(750, 0.66f, 1250);
 			} else {
-				engine.turn(750, 0.33f, 1000);
+				engine.turn(750, 0.33f, 1250);
 			}
 		} catch (InterruptedException e) {
 			Core.l.out("We are interupting so we probably found the line");
-			// Long diff = (System.nanoTime() - currentTime) / 1000000000;
-			// LCD.drawString(diff.toString(), 2, 2);
-			// checkFirst.setTime(diff);
-			// Optimize to search using the last used EngineAction
-			// checkFirst.setE(w.getLastEngine());
 			return true;
 		}
 		return false;

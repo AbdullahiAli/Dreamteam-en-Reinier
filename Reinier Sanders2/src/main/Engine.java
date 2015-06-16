@@ -1,5 +1,6 @@
 package main;
 
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
 
@@ -63,12 +64,17 @@ public class Engine extends Thread {
 		wait(wait);
 	}
 
-	public void doForward(int i) throws InterruptedException {
+	public synchronized void doForward(int i) {
 		left.setSpeed(500);
 		right.setSpeed(500);
-		MotorForward(right);
-		MotorForward(left);
-		wait(i);
+
+		try {
+			MotorForward(right);
+			MotorForward(left);
+			wait(i);
+		} catch (InterruptedException e) {
+			LCD.drawString("INTERRUPTED", 3, 3);
+		}
 	}
 
 	private void MotorForward(NXTRegulatedMotor m) {
