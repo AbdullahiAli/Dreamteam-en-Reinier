@@ -41,6 +41,7 @@ public class UltrasonicSensor extends Thread {
 				sample = getDistance();
 
 				ar.add(sample[0]);
+				// We might have to change 0.40f into something else
 				if (isClose(0.40f)) {
 					seh.eventHandle(new UltraSonicEvent());
 				}
@@ -60,7 +61,7 @@ public class UltrasonicSensor extends Thread {
 		return sample;
 	}
 
-	private boolean isClose(float belowThisValue) {
+	public boolean isClose(float belowThisValue) {
 		float max = Float.MIN_VALUE;
 		float min = Float.MAX_VALUE;
 		for (float v : ar) {

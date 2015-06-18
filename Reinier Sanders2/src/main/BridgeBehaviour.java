@@ -11,7 +11,7 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 
 	public BridgeBehaviour() {
 		super();
-		setup(this, false);
+		setup(this, false, false);
 		this.start();
 	}
 
@@ -37,13 +37,13 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 			if (r instanceof ColorEvent) {
 				l.out("isRed is: " + ((ColorEvent) r).isRed());
 				if (((ColorEvent) r).isRed()) {
-					engine.Forward();
+					engine.Forward(0);
 
 				} else {
 					searchLine();
 				}
 			} else {
-				engine.Forward();
+				engine.Forward(0);
 			}
 		} catch (InterruptedException e) {
 			l.out("Our command was interupted");
@@ -74,13 +74,13 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 			if (r instanceof ColorEvent) {
 				l.out("isRed is: " + ((ColorEvent) r).isRed());
 				if (((ColorEvent) r).isRed()) {
-					engine.Forward();
+					engine.Forward(0);
 
 				} else {
 					searchLine();
 				}
 			} else {
-				engine.Forward();
+				engine.Forward(0);
 			}
 		} catch (InterruptedException e) {
 			l.out("Our command was interupted");

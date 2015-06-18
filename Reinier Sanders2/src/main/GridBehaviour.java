@@ -8,30 +8,28 @@ import Interfaces.RobotEventHandler;
 import Interfaces.UltraSonicEvent;
 
 public class GridBehaviour extends Core implements RobotEventHandler {
-	private Integer count = 0;
-	private long timer;
-	private GyroSensor gyro;
 	private EngineAction2 checkFirst = new EngineAction2(EngineAction.left, 0);
 	private int corners = 0;
-	private UltrasonicSensor uss;
+
 	private boolean gridFound = false;
 	private boolean hardCode = false;
 
 	public GridBehaviour() {
 		super();
-
-		// Moet misschien veranderd worden als startGrid is geïmplementeerd
-		setup(this, false);
-
-		uss = new UltrasonicSensor(this);
+		setup(this, false, true);
 		this.start();
 	}
 
 	public synchronized void run() {
-		// startGrid();
-		/*
-		 * while (corners < 4) { followLine(); }
-		 */
+
+		while (!gridFound) {
+			startGrid();
+		}
+
+		while (corners < 4) {
+			followLine();
+		}
+
 		toCenter();
 
 	}
@@ -41,7 +39,21 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 		turnMove();
 		turnMove();
 		hardCode = true;
-		engine.doForward(1000);
+		try {
+			engine.Forward(1500);
+			engine.turnRight(1000);
+		} catch (InterruptedException e) {
+		}
+		Core.w.setLastEngine(EngineAction.left);
+		hardCode = false;
+		turnMove();
+		hardCode = true;
+		try {
+			engine.Forward(2500);
+		} catch (InterruptedException e) {
+
+		}
+		Sound.buzz();
 	}
 
 	public void turnCenter() {
@@ -51,24 +63,34 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 	@Override
 	public void eventHandle(RobotEvent re) {
 		q.add(re);
-
 		if (re instanceof UltraSonicEvent) {
 			LCD.drawString("Pillar found", 2, 2);
 			Sound.twoBeeps();
 		} else if (!hardCode) {
 			interrupt();
+
 		}
 	}
 
 	private synchronized void startGrid() {
-
 		try {
-			engine.turn(750, 0.33f);
+			engine.Forward(0);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-		}
+			try {
+				engine.doCommand(EngineAction.stop, 0);
+				hardCode = true;
+				engine.turnLeft(1000);
+				hardCode = false;
+				gridFound = true;
+				Core.w.setLastEngine(EngineAction.right);
+			} catch (InterruptedException e1) {
 
+			}
+		}
+		/*
+		 * try { engine.turn(750, 0.33f); } catch (InterruptedException e) { //
+		 * TODO Auto-generated catch block // e.printStackTrace(); }
+		 */
 	}
 
 	@Override
