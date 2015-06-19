@@ -16,7 +16,7 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 
 	public GridBehaviour() {
 		super();
-		setup(this, false, true);
+		setup(this, false, true, false);
 		this.start();
 	}
 
