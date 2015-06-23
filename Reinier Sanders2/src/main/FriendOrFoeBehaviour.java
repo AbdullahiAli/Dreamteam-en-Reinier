@@ -10,7 +10,7 @@ public class FriendOrFoeBehaviour extends Core implements RobotEventHandler {
 
 	public FriendOrFoeBehaviour() {
 		super();
-		setup(this, false, true);
+		setup(this, false, true, false);
 		this.start();
 	}
 

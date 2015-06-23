@@ -17,6 +17,7 @@ public abstract class Core extends Thread {
 	public static final WorldKnowledge w = new WorldKnowledge();
 	protected ColorSensor t;
 	protected UltrasonicSensor uss;
+	protected Grabber g;
 
 	protected final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
 
@@ -26,12 +27,15 @@ public abstract class Core extends Thread {
 
 	}
 
-	protected void setup(RobotEventHandler c, boolean onLine, boolean ultraSonic) {
+	protected void setup(RobotEventHandler c, boolean onLine,
+			boolean ultraSonic, boolean grabber) {
 		t = new ColorSensor(c, onLine);
 		if (ultraSonic) {
 			uss = new UltrasonicSensor(c);
 		}
-
+		if (grabber) {
+			g = new Grabber();
+		}
 	}
 
 	protected abstract void followLine();

@@ -11,14 +11,13 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 
 	public BridgeBehaviour() {
 		super();
-		setup(this, false, false);
+		setup(this, false, false, false);
 		this.start();
 	}
 
 	public synchronized void run() {
 		while (true)
 			followLine();
-
 	}
 
 	@Override

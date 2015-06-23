@@ -16,7 +16,7 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 
 	public GridBehaviour() {
 		super();
-		setup(this, false, true);
+		setup(this, false, true, false);
 		this.start();
 	}
 
@@ -103,7 +103,6 @@ public class GridBehaviour extends Core implements RobotEventHandler {
 	}
 
 	private synchronized boolean turnMove() {
-		// long currentTime = System.nanoTime();
 		try {
 			if (Core.w.getLastEngine() == EngineAction.left) {
 				engine.turn(750, 0.66f, 1250);
