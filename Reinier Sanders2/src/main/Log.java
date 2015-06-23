@@ -75,7 +75,7 @@ public class Log extends Thread {
 		while (true) {
 			try {
 				String tmp = q.take();
-				// send(tmp);
+				send(tmp);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

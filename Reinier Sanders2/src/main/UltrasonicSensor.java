@@ -3,7 +3,6 @@ package main;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
@@ -23,6 +22,7 @@ public class UltrasonicSensor extends Thread {
 	private float[] sample;
 	private RobotEventHandler seh;
 	private AtomicBoolean enabled = new AtomicBoolean(true);
+
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
 	private float maxDistance = 0.40f;
 
@@ -35,6 +35,11 @@ public class UltrasonicSensor extends Thread {
 
 	public synchronized void run() {
 		float[] sample;
+		try {
+			wait();
+		} catch (InterruptedException e1) {
+
+		}
 		while (enabled.get()) {
 			synchronized (this) {
 				if (ar.size() >= 3) {
@@ -43,13 +48,17 @@ public class UltrasonicSensor extends Thread {
 				sample = getDistance();
 
 				ar.add(sample[0]);
-				LCD.drawString("" + getMaxDistance(), 0, 7);
 				if (isClose(maxDistance)) {
 					seh.eventHandle(new UltraSonicEvent());
+					try {
+						wait(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+					}
 				}
 			}
 			try {
-				wait(10);
+				wait(30);
 			} catch (InterruptedException e) {
 			}
 		}
@@ -82,7 +91,7 @@ public class UltrasonicSensor extends Thread {
 				max = v;
 			}
 		}
-		LCD.drawString("" + min, 0, 6);
+
 		return Math.abs(min - max) < THRESHHOLD && Math.abs(min - max) > 0
 				&& min < belowThisValue;
 

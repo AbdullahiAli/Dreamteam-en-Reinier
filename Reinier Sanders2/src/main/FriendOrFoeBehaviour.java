@@ -1,5 +1,7 @@
 package main;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import main.Engine.EngineAction;
@@ -12,6 +14,10 @@ public class FriendOrFoeBehaviour extends Core implements RobotEventHandler {
 
 	private EngineAction checkFirst;
 	private boolean movingToPillar = false;
+	private AtomicBoolean sonarInterrupt = new AtomicBoolean(true);
+	private AtomicBoolean colorInterrupt = new AtomicBoolean(true);
+	private final float normalUpperBound = 0.50f;
+	private final float closeUpperBound = 0.16f;
 
 	public FriendOrFoeBehaviour() {
 		super();
@@ -23,8 +29,12 @@ public class FriendOrFoeBehaviour extends Core implements RobotEventHandler {
 	}
 
 	public void run() {
+		synchronized (uss) {
+			uss.notify();
+		}
 		while (true) {
 			pillars();
+			l.out("Program loop ended cycle");
 		}
 	}
 
@@ -34,82 +44,101 @@ public class FriendOrFoeBehaviour extends Core implements RobotEventHandler {
 	}
 
 	private void searchPillars() {
-		uss.setMaxDistance(0.40f);
-		try {
-			engine.turnRight(16000);
-			engine.doForward(2000);
-		} catch (InterruptedException e) {
-
+		while (true) {
+			uss.setMaxDistance(normalUpperBound);
+			try {
+				engine.turnRight(16000);
+				engine.doForward(2000);
+			} catch (InterruptedException e) {
+				LCD.drawString("searchPillars interrupt", 0, 1);
+				l.out("searchpillars got interrupted");
+				return;
+			}
+			l.out("search pillar cycle ended");
 		}
-
-		/*
-		 * try { //engine.doForward(2000); } catch (InterruptedException e) {
-		 * 
-		 * }
-		 */
 	}
 
 	private void pillarBehaviour() {
-
-		// uss.setMaxDistance(0.10f);
+		l.out("starting pillarbehavior");
 		moveToPillar();
-
-		if (t.isRed(0.08f))
+		if (t.isRed(0.08f)) {
+			l.out("starting killbehavoir");
 			killingBehaviour();
-		else {
+		} else {
+			l.out("starting matebehavoir");
 			matingBehaviour();
 		}
 
 	}
 
-	private synchronized void moveToPillar() {
-		LCD.drawString("Moving to pillar", 0, 2);
+	private void getCloseToPillar() {
+		sonarInterrupt.set(true);
+		l.out("getting close to pillar");
 		try {
+
+			uss.setMaxDistance(closeUpperBound);
+			engine.turn(250, 0.95f, 400);
 			while (true) {
-				uss.setMaxDistance(0.10f);
-				engine.doForward(500);
-				uss.setMaxDistance(0.45f);
-				turnBehaviour();
+				engine.turn(250, 0.05f, 800);
+				engine.turn(250, 0.95f, 800);
 			}
 		} catch (InterruptedException e) {
-			LCD.drawString("moveToPillar interrupted", 0, 5);
+			LCD.drawString("getCloseToPillar interrupted", 0, 3);
+			l.out("getting close to pillar interrupted");
 		}
-		LCD.drawString("Pillar found!", 0, 3);
+		uss.setMaxDistance(normalUpperBound);
+
+		sonarInterrupt.set(true);
+	}
+
+	private void moveToPillar() {
+		LCD.drawString("MoveToPillar started", 0, 2);
+		getCloseToPillar();
+		turnBehaviour();
+		LCD.drawString("MoveToPillar done", 0, 5);
 	}
 
 	private void turnBehaviour() {
-		/*
-		 * try { LCD.drawString("Turning", 0, 4); if (checkFirst ==
-		 * EngineAction.left) { engine.turnLeft(1500); engine.turnRight(3000); }
-		 * else { engine.turnRight(1500); engine.turnLeft(3000); } } catch
-		 * (InterruptedException e) {
-		 * LCD.drawString("turnBehaviour interrupted", 0, 5); checkFirst =
-		 * w.getLastEngine(); }
-		 */
-
+		colorInterrupt.set(false);
+		uss.setMaxDistance(closeUpperBound);
+		l.out("starting turnbehavoir");
 		try {
-			while (true) {
-				engine.turnRight(1000);
-				engine.turnLeft(2000);
-			}
+			engine.turnRight(1000);
+			engine.turnLeft(2000);
+			engine.turnRight(1000);
 
 		} catch (InterruptedException e) {
+			LCD.drawString("turnBehaviour interrupted", 0, 4);
+			l.out("turnBehavior got interrupted");
 		}
-
+		colorInterrupt.set(true);
+		uss.setMaxDistance(normalUpperBound);
 	}
 
 	private void killingBehaviour() {
-		LCD.drawString("KILL", 0, 0);
+		colorInterrupt.set(false);
+		sonarInterrupt.set(false);
+		try {
+			engine.doBackward(500);
+			engine.turn(1000, 0.5f, 700);
+		} catch (InterruptedException e) {
+
+		}
+
+		sonarInterrupt.set(true);
+		colorInterrupt.set(true);
+
 	}
 
 	private void matingBehaviour() {
-		LCD.drawString("Mate", 0, 0);
+		colorInterrupt.set(false);
+		sonarInterrupt.set(false);
 		Sound.twoBeeps();
-		try {
-			engine.turnRight(8000);
-		} catch (InterruptedException e) {
-		}
-
+		Sound.twoBeeps();
+		Sound.twoBeeps();
+		Sound.twoBeeps();
+		sonarInterrupt.set(true);
+		colorInterrupt.set(true);
 	}
 
 	public boolean isBeach(float value) {
@@ -119,17 +148,18 @@ public class FriendOrFoeBehaviour extends Core implements RobotEventHandler {
 	@Override
 	public void eventHandle(RobotEvent re) {
 		if (re instanceof ColorEvent) {
-			interrupt();
-			try {
-				if (isBeach(((ColorEvent) re).getValue()))
-					engine.turnRight(8000);
-
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				// e.printStackTrace();
+			if (colorInterrupt.get()) {
+				interrupt();
+				try {
+					if (isBeach(((ColorEvent) re).getValue()))
+						engine.turnRight(8000);
+				} catch (InterruptedException e) {
+				}
 			}
+
 		} else if (re instanceof UltraSonicEvent) {
-			interrupt();
+			if (sonarInterrupt.get())
+				interrupt();
 		}
 
 	}
