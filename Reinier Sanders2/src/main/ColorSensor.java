@@ -37,6 +37,14 @@ public class ColorSensor extends Thread {
 		return (sum / 3.0f) >= threshold;
 	}
 
+	public synchronized float getValue() {
+		Float sum = 0.0f;
+		for (float f : ar) {
+			sum += f;
+		}
+		return (sum / 3.0f);
+	}
+
 	@Override
 	public synchronized void run() {
 
@@ -51,7 +59,7 @@ public class ColorSensor extends Thread {
 				// Core.l.out("" + sample[0]);
 				boolean measure = isRed(0.08f);
 				if (measure != lastMeasurement) {
-					seh.eventHandle(new ColorEvent(measure));
+					seh.eventHandle(new ColorEvent(measure, getValue()));
 					lastMeasurement = measure;
 				}
 			}

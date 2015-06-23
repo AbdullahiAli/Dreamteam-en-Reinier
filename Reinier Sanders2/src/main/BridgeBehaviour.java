@@ -53,11 +53,11 @@ public class BridgeBehaviour extends Core implements RobotEventHandler {
 	private synchronized void searchLine() {
 		try {
 			if (checkFirst == EngineAction.left) {
-				engine.turnLeft(1500);
-				engine.turnRight(3000);
+				engine.turnLeft(325);
+				engine.turnRight(750);
 			} else {
-				engine.turnRight(1500);
-				engine.turnLeft(3000);
+				engine.turnRight(325);
+				engine.turnLeft(750);
 			}
 		} catch (InterruptedException e) {
 			Core.l.out("We are interupting so we probably found the line");

@@ -9,13 +9,23 @@ import lejos.hardware.motor.NXTRegulatedMotor;
  */
 public class Engine extends Thread {
 	private NXTRegulatedMotor left = Motor.C, right = Motor.B;
+	private int turnSpeed = 100;
+	private int driveSpeed = 500;
 
 	public enum EngineAction {
-		left, right, forward, stop
+		left, right, forward, backward, stop
 	}
 
 	public Engine() {
 		Core.l.out("Engine started");
+	}
+
+	public void setTurnSpeed(int speed) {
+		turnSpeed = speed;
+	}
+
+	public void setDriveSpeed(int speed) {
+		driveSpeed = speed;
 	}
 
 	public void turnLeft(int wait) throws InterruptedException {
@@ -27,10 +37,18 @@ public class Engine extends Thread {
 	}
 
 	private synchronized void doTurnLeft(int wait) throws InterruptedException {
-		left.setSpeed(100);
-		right.setSpeed(100);
+		left.setSpeed(turnSpeed);
+		right.setSpeed(turnSpeed);
 		MotorBackward(left);
 		MotorForward(right);
+		wait(wait);
+	}
+
+	private synchronized void doTurnRight(int wait) throws InterruptedException {
+		left.setSpeed(turnSpeed);
+		right.setSpeed(turnSpeed);
+		MotorForward(left);
+		MotorBackward(right);
 		wait(wait);
 	}
 
@@ -55,20 +73,21 @@ public class Engine extends Thread {
 
 	}
 
-	private synchronized void doTurnRight(int wait) throws InterruptedException {
-		left.setSpeed(100);
-		right.setSpeed(100);
-		MotorForward(left);
-		MotorBackward(right);
-		wait(wait);
-	}
-
 	public synchronized void doForward(int i) throws InterruptedException {
-		left.setSpeed(500);
-		right.setSpeed(500);
+		left.setSpeed(driveSpeed);
+		right.setSpeed(driveSpeed);
 
 		MotorForward(right);
 		MotorForward(left);
+		wait(i);
+
+	}
+
+	public synchronized void doBackward(int i) throws InterruptedException {
+		left.setSpeed(driveSpeed);
+		right.setSpeed(driveSpeed);
+		MotorBackward(right);
+		MotorBackward(left);
 		wait(i);
 
 	}
@@ -102,6 +121,9 @@ public class Engine extends Thread {
 			doForward(wait);
 			stopEngines();
 			break;
+		case backward:
+			doBackward(wait);
+			stopEngines();
 		case stop:
 			stopEngines();
 			break;

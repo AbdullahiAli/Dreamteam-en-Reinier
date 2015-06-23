@@ -22,7 +22,9 @@ public class UltrasonicSensor extends Thread {
 	private float[] sample;
 	private RobotEventHandler seh;
 	private AtomicBoolean enabled = new AtomicBoolean(true);
+
 	private ArrayList<Float> ar = new ArrayList<Float>(3);
+	private float maxDistance = 0.40f;
 
 	public UltrasonicSensor(RobotEventHandler seh) {
 		// constructor
@@ -33,6 +35,11 @@ public class UltrasonicSensor extends Thread {
 
 	public synchronized void run() {
 		float[] sample;
+		try {
+			wait();
+		} catch (InterruptedException e1) {
+
+		}
 		while (enabled.get()) {
 			synchronized (this) {
 				if (ar.size() >= 3) {
@@ -41,16 +48,28 @@ public class UltrasonicSensor extends Thread {
 				sample = getDistance();
 
 				ar.add(sample[0]);
-				// We might have to change 0.40f into something else
-				if (isClose(0.40f)) {
+				if (isClose(maxDistance)) {
 					seh.eventHandle(new UltraSonicEvent());
+					try {
+						wait(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+					}
 				}
 			}
 			try {
-				wait(50);
+				wait(30);
 			} catch (InterruptedException e) {
 			}
 		}
+	}
+
+	public float getMaxDistance() {
+		return maxDistance;
+	}
+
+	public void setMaxDistance(float distance) {
+		this.maxDistance = distance;
 	}
 
 	public float[] getDistance() {
@@ -72,6 +91,7 @@ public class UltrasonicSensor extends Thread {
 				max = v;
 			}
 		}
+
 		return Math.abs(min - max) < THRESHHOLD && Math.abs(min - max) > 0
 				&& min < belowThisValue;
 

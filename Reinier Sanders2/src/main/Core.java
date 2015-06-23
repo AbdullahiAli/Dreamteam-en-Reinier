@@ -16,8 +16,8 @@ public abstract class Core extends Thread {
 	protected final Engine engine = new Engine();
 	public static final WorldKnowledge w = new WorldKnowledge();
 	protected ColorSensor t;
-	protected UltrasonicSensor uss;
 	protected Grabber g;
+	protected UltrasonicSensor uss;
 
 	protected final ConcurrentLinkedQueue<RobotEvent> q = new ConcurrentLinkedQueue<RobotEvent>();
 
